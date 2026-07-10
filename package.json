@@ -1,0 +1,8 @@
+{
+  "name": "magalhaes-estoque",
+  "version": "1.0.0",
+  "description": "Sistema de controle de estoque Magalhães Diesel",
+  "dependencies": {
+    "pg": "^8.11.3"
+  }
+}

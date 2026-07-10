@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Magalhães Diesel | Controle de Estoque</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><span class="bolt">◆</span><div><strong>MAGALHÃES</strong><b>DIESEL</b></div></div>
+    <p class="brand-subtitle">Peças, ferramentas e soluções</p>
+    <nav>
+      <button class="nav-link active" data-page="dashboard"><span>▦</span> Visão geral</button>
+      <button class="nav-link" data-page="products"><span>▤</span> Estoque</button>
+      <button class="nav-link" data-page="requests"><span>⌕</span> Procuras de clientes</button>
+      <button class="nav-link" data-page="report"><span>!</span> Relatório de faltas</button>
+    </nav>
+    <div class="sidebar-footer">
+      <small>Hospedado no Vercel</small>
+    </div>
+  </aside>
+
+  <main class="content">
+    <header class="topbar"><div><p id="eyebrow">PAINEL OPERACIONAL</p><h1 id="page-title">Bom dia, equipe.</h1></div><div class="today" id="today"></div></header>
+
+    <section class="page active" id="dashboard">
+      <div class="hero"><div><span class="eyebrow-light">CONTROLE SIMPLES, DECISÕES MELHORES</span><h2>Seu estoque sob controle.</h2><p>Veja o que precisa repor e o que seus clientes estão procurando.</p></div><button class="button white" data-open="request-modal">+ Anotar procura</button></div>
+      <div class="metrics">
+        <article><span class="metric-icon blue">▤</span><div><small>ITENS CADASTRADOS</small><strong id="metric-catalog">—</strong><p id="metric-units">— unidades em estoque</p></div></article>
+        <article><span class="metric-icon red">!</span><div><small>PRECISAM DE ATENÇÃO</small><strong id="metric-critical">—</strong><p>no nível mínimo ou abaixo</p></div></article>
+        <article><span class="metric-icon gold">⌕</span><div><small>PROCURAS EM ABERTO</small><strong id="metric-requests">—</strong><p>oportunidades de venda</p></div></article>
+      </div>
+      <div class="grid two">
+        <section class="panel"><div class="panel-heading"><div><h3>Reposição necessária</h3><p>Itens no mínimo ou em falta</p></div><button class="text-button" data-goto="report">Ver relatório →</button></div><div id="low-list" class="compact-list"></div></section>
+        <section class="panel"><div class="panel-heading"><div><h3>Mais procurados</h3><p>Demandas anotadas pelos clientes</p></div><button class="text-button" data-goto="requests">Ver procuras →</button></div><div id="wanted-list" class="compact-list"></div></section>
+      </div>
+    </section>
+
+    <section class="page" id="products">
+      <div class="section-head"><div><p class="eyebrow">CADASTRO E MOVIMENTAÇÃO</p><h2>Estoque</h2><p>Cadastre produtos e atualize as quantidades a cada entrada ou saída.</p></div><div class="actions"><button class="button secondary" data-open="movement-modal">↕ Movimentar estoque</button><button class="button" data-open="product-modal">+ Novo produto</button></div></div>
+      <div class="panel table-panel"><div class="search-row"><input id="product-search" placeholder="Buscar por produto, código ou categoria"><span id="product-count"></span></div><div class="table-wrap"><table><thead><tr><th>Produto</th><th>Categoria</th><th>Código</th><th>Disponível</th><th>Mínimo</th><th>Status</th></tr></thead><tbody id="products-body"></tbody></table></div></div>
+    </section>
+
+    <section class="page" id="requests">
+      <div class="section-head"><div><p class="eyebrow">ESCUTE O CLIENTE</p><h2>Procuras de clientes</h2><p>Anote todo item procurado, mesmo se não estiver cadastrado.</p></div><button class="button" data-open="request-modal">+ Anotar procura</button></div>
+      <div class="grid request-layout"><section class="panel"><div class="panel-heading"><div><h3>Pedidos anotados</h3><p>Use esta lista para retorno e planejamento de compra.</p></div></div><div id="request-list" class="request-list"></div></section><aside class="tip"><span>✦</span><h3>Por que registrar?</h3><p>Em poucos dias você descobre os produtos que está deixando de vender por não ter em estoque.</p></aside></div>
+    </section>
+
+    <section class="page" id="report">
+      <div class="section-head"><div><p class="eyebrow">LISTA DE COMPRAS</p><h2>Relatório de faltas</h2><p>Produtos zerados ou que já atingiram a quantidade mínima definida.</p></div><button class="button secondary" onclick="window.print()">⎙ Imprimir relatório</button></div>
+      <section class="panel table-panel"><div class="report-summary" id="report-summary"></div><div class="table-wrap"><table><thead><tr><th>Produto</th><th>Categoria</th><th>Em estoque</th><th>Mínimo</th><th>Faltam para repor</th><th>Prioridade</th></tr></thead><tbody id="report-body"></tbody></table></div></section>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="product-modal"><form class="modal" id="product-form"><button type="button" class="close" data-close>×</button><p class="eyebrow">NOVO CADASTRO</p><h2>Adicionar produto</h2><label>Nome do produto<input required name="name" placeholder="Ex.: Filtro de óleo MWM"></label><div class="form-grid"><label>Categoria<input required name="category" list="categories" placeholder="Ex.: Peças"></label><label>Código / referência<input name="sku" placeholder="Ex.: FIL-001"></label></div><div class="form-grid three"><label>Quantidade atual<input required name="quantity" type="number" min="0" value="0"></label><label>Estoque mínimo<input required name="minimum" type="number" min="0" value="1"></label><label>Unidade<input required name="unit" value="un" placeholder="un, metro, jogo"></label></div><button class="button full">Salvar produto</button></form></div>
+  <datalist id="categories"><option>Peças</option><option>Lubrificantes</option><option>Mangueiras</option><option>Ferramentas</option><option>Parafusos</option><option>Lonas</option></datalist>
+  <div class="modal-backdrop" id="movement-modal"><form class="modal" id="movement-form"><button type="button" class="close" data-close>×</button><p class="eyebrow">ATUALIZAÇÃO RÁPIDA</p><h2>Movimentar estoque</h2><label>Produto<select required name="product_id" id="movement-product"></select></label><div class="form-grid"><label>Tipo<select name="type"><option value="entrada">Entrada (compra/recebimento)</option><option value="saida">Saída (venda/uso)</option></select></label><label>Quantidade<input required name="quantity" type="number" min="1" value="1"></label></div><label>Observação <small>(opcional)</small><input name="note" placeholder="Ex.: Nota 1458 ou venda balcão"></label><button class="button full">Registrar movimentação</button></form></div>
+  <div class="modal-backdrop" id="request-modal"><form class="modal" id="request-form"><button type="button" class="close" data-close>×</button><p class="eyebrow">OPORTUNIDADE DE VENDA</p><h2>Anotar procura</h2><label>Qual item o cliente procurou?<input required name="item" placeholder="Ex.: Filtro separador de água"></label><div class="form-grid"><label>Quantidade<input required name="quantity" type="number" min="1" value="1"></label><label>Nome do cliente <small>(opcional)</small><input name="customer" placeholder="Ex.: Oficina do Zé"></label></div><div class="form-grid"><label>Telefone <small>(opcional)</small><input name="phone" placeholder="(86) 9 9999-9999"></label><label>Observação <small>(opcional)</small><input name="note" placeholder="Modelo, medida ou retorno"></label></div><button class="button full">Salvar procura</button></form></div>
+  <div id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
