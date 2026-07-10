@@ -7,6 +7,20 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Cabeçalho que só aparece ao imprimir -->
+  <div class="print-header">
+    <div class="print-logo">
+      <span class="print-bolt">◆</span>
+      <div>
+        <strong>MAGALHÃES DIESEL</strong>
+        <p>Peças, ferramentas e soluções</p>
+      </div>
+    </div>
+    <div class="print-meta">
+      <p id="print-title-label">RELATÓRIO</p>
+      <p id="print-date"></p>
+    </div>
+  </div>
   <aside class="sidebar">
     <div class="brand"><span class="bolt">◆</span><div><strong>MAGALHÃES</strong><b>DIESEL</b></div></div>
     <p class="brand-subtitle">Peças, ferramentas e soluções</p>
@@ -43,12 +57,12 @@
     </section>
 
     <section class="page" id="requests">
-      <div class="section-head"><div><p class="eyebrow">ESCUTE O CLIENTE</p><h2>Procuras de clientes</h2><p>Anote todo item procurado, mesmo se não estiver cadastrado.</p></div><button class="button" data-open="request-modal">+ Anotar procura</button></div>
-      <div class="grid request-layout"><section class="panel"><div class="panel-heading"><div><h3>Pedidos anotados</h3><p>Use esta lista para retorno e planejamento de compra.</p></div></div><div id="request-list" class="request-list"></div></section><aside class="tip"><span>✦</span><h3>Por que registrar?</h3><p>Em poucos dias você descobre os produtos que está deixando de vender por não ter em estoque.</p></aside></div>
+      <div class="section-head"><div><p class="eyebrow">ESCUTE O CLIENTE</p><h2>Procuras de clientes</h2><p>Anote todo item procurado, mesmo se não estiver cadastrado.</p></div><div class="actions"><button class="button secondary" onclick="printRequests()">⎙ Imprimir lista</button><button class="button" data-open="request-modal">+ Anotar procura</button></div></div>
+      <div class="grid request-layout"><section class="panel"><div class="panel-heading"><div><h3>Pedidos anotados</h3><p>Use esta lista para retorno e planejamento de compra.</p></div></div><div id="request-list" class="request-list"></div></section><aside class="tip"><span>✦</span><h3>Por que registrar?</h3><p>Em poucos dias você descobre os produtos que está deixando de vender por não ter em estoque.</p><hr style="border-color:rgba(255,255,255,0.08);margin:16px 0"><p style="font-size:0.8rem;color:var(--text-muted)">Use o botão <strong>+1</strong> quando outro cliente procurar o mesmo item — sem precisar cadastrar de novo.</p></aside></div>
     </section>
 
     <section class="page" id="report">
-      <div class="section-head"><div><p class="eyebrow">LISTA DE COMPRAS</p><h2>Relatório de faltas</h2><p>Produtos zerados ou que já atingiram a quantidade mínima definida.</p></div><button class="button secondary" onclick="window.print()">⎙ Imprimir relatório</button></div>
+      <div class="section-head"><div><p class="eyebrow">LISTA DE COMPRAS</p><h2>Relatório de faltas</h2><p>Produtos zerados ou que já atingiram a quantidade mínima definida.</p></div><button class="button secondary" onclick="printReport()">⎙ Imprimir relatório</button></div>
       <section class="panel table-panel"><div class="report-summary" id="report-summary"></div><div class="table-wrap"><table><thead><tr><th>Produto</th><th>Categoria</th><th>Em estoque</th><th>Mínimo</th><th>Faltam para repor</th><th>Prioridade</th></tr></thead><tbody id="report-body"></tbody></table></div></section>
     </section>
   </main>

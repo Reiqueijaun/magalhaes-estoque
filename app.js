@@ -65,7 +65,35 @@ async function loadProducts() {
 
 async function loadRequests() {
   const rows = await api("/api/requests");
-  $("#request-list").innerHTML = rows.length ? rows.map(r => `<div class="request-row"><span class="circle ${r.status === "aberta" ? "red" : ""}">${r.quantity}x</span><div><h4>${escapeHtml(r.item)}</h4><p>${r.customer ? escapeHtml(r.customer) + " · " : ""}${r.phone ? escapeHtml(r.phone) + " · " : ""}${formatDate(r.created_at)}${r.note ? " · " + escapeHtml(r.note) : ""}</p></div><span class="badge ${r.status === "aberta" ? "low" : "good"}">${r.status === "aberta" ? "Em aberto" : "Atendida"}</span>${r.status === "aberta" ? `<button data-close-request="${r.id}">Marcar atendida</button>` : ""}</div>`).join("") : '<p class="empty">Nenhuma procura anotada ainda.</p>';
+  $("#request-list").innerHTML = rows.length ? rows.map(r => {
+    const isOpen = r.status === 'aberta';
+    return `<div class="request-row">
+      <span class="circle ${isOpen ? 'red' : ''}">${r.quantity}x</span>
+      <div>
+        <h4>${escapeHtml(r.item)}</h4>
+        <p>${r.customer ? escapeHtml(r.customer) + ' · ' : ''}${r.phone ? escapeHtml(r.phone) + ' · ' : ''}${formatDate(r.created_at)}${r.note ? ' · ' + escapeHtml(r.note) : ''}</p>
+      </div>
+      <span class="badge ${isOpen ? 'low' : 'good'}">${isOpen ? 'Em aberto' : 'Atendida'}</span>
+      ${isOpen ? `<button class="btn-increment" data-increment-request="${r.id}" title="Mais um cliente procurou este item">+1</button>` : ''}
+      ${isOpen ? `<button data-close-request="${r.id}">Atendida ✓</button>` : ''}
+    </div>`;
+  }).join('') : '<p class="empty">Nenhuma procura anotada ainda.</p>';
+}
+
+function printReport() {
+  const label = document.getElementById('print-title-label');
+  const date = document.getElementById('print-date');
+  if (label) label.textContent = 'RELATÓRIO DE FALTAS E REPOSIÇÃO';
+  if (date) date.textContent = 'Gerado em: ' + new Intl.DateTimeFormat('pt-BR', {dateStyle: 'long', timeStyle: 'short'}).format(new Date());
+  window.print();
+}
+
+function printRequests() {
+  const label = document.getElementById('print-title-label');
+  const date = document.getElementById('print-date');
+  if (label) label.textContent = 'RELATÓRIO DE PROCURAS DE CLIENTES';
+  if (date) date.textContent = 'Gerado em: ' + new Intl.DateTimeFormat('pt-BR', {dateStyle: 'long', timeStyle: 'short'}).format(new Date());
+  window.print();
 }
 
 async function loadReport() {
@@ -104,6 +132,15 @@ document.addEventListener("click", async (event) => {
   const closeButton = event.target.closest("[data-close-request]");
   if (closeButton) {
     try { await api(`/api/requests?action=close&id=${closeButton.dataset.closeRequest}`, {method: "POST"}); toast("Procura marcada como atendida."); await refreshAll(); }
+    catch (err) { toast(err.message, true); }
+  }
+  const incrementBtn = event.target.closest("[data-increment-request]");
+  if (incrementBtn) {
+    try { 
+      const res = await api(`/api/requests?action=increment&id=${incrementBtn.dataset.incrementRequest}`, {method: "POST"});
+      toast(`✅ Mais uma procura registrada! Total: ${res.quantity}x`);
+      await refreshAll();
+    }
     catch (err) { toast(err.message, true); }
   }
 });

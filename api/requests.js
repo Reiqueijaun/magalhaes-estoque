@@ -30,6 +30,19 @@ module.exports = async function (req, res) {
       }
     }
 
+    if (action === 'increment' && id) {
+      try {
+        const result = await db.query(
+          'UPDATE requests SET quantity = quantity + 1 WHERE id = $1 AND status = $2 RETURNING id, quantity',
+          [parseInt(id), 'aberta']
+        );
+        if (result.rowCount === 0) return res.status(404).json({ error: 'Procura não encontrada ou já atendida.' });
+        return res.status(200).json({ message: 'Mais uma procura registrada!', quantity: result.rows[0].quantity });
+      } catch (err) {
+        return res.status(500).json({ error: err.message });
+      }
+    }
+
     // Criar nova procura
     const { item, quantity, customer, phone, note } = req.body;
     if (!item || item.trim() === '') {

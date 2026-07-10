@@ -746,18 +746,252 @@ form input:focus, form select:focus {
   opacity: 1;
 }
 
-/* Print */
+/* Botão +1 */
+.btn-increment {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid var(--accent-primary);
+  color: var(--accent-primary);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+.btn-increment:hover {
+  background: var(--accent-primary);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+/* Cabeçalho de impressão (invisível na tela) */
+.print-header {
+  display: none;
+}
+
+/* ===== MODO IMPRESSÃO ===== */
 @media print {
-  .sidebar, .topbar, .section-head button, .actions, .search-row, .modal-backdrop {
+  @page {
+    margin: 20mm 15mm;
+    size: A4;
+  }
+
+  /* Esconder tudo que não pertence ao relatório */
+  .sidebar,
+  .topbar,
+  .section-head .actions,
+  .section-head button,
+  .search-row,
+  .modal-backdrop,
+  #toast,
+  .tip,
+  .btn-increment,
+  [data-close-request],
+  [data-open],
+  nav,
+  .brand-subtitle,
+  .sidebar-footer {
     display: none !important;
   }
+
+  /* Layout geral */
   body {
-    background: #fff;
-    color: #000;
+    background: #fff !important;
+    color: #111 !important;
+    font-family: 'Outfit', Arial, sans-serif;
+    font-size: 11pt;
+    margin: 0;
+    padding: 0;
+    display: block;
   }
-  .content { margin: 0; padding: 0; max-width: none; }
-  .table-panel { border: none; }
-  th { background: #eee; color: #000; }
-  td { border-bottom: 1px solid #ccc; }
-  .badge { border: 1px solid #000; color: #000 !important; background: transparent !important; }
+
+  .content {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Mostrar cabeçalho de impressão */
+  .print-header {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #1a1a2e;
+    padding-bottom: 12px;
+    margin-bottom: 24px;
+  }
+
+  .print-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .print-bolt {
+    font-size: 2rem;
+    color: #2563eb;
+  }
+
+  .print-logo strong {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: #1a1a2e;
+    display: block;
+  }
+
+  .print-logo p {
+    font-size: 0.8rem;
+    color: #555;
+    margin: 0;
+  }
+
+  .print-meta {
+    text-align: right;
+  }
+
+  #print-title-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #2563eb;
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  #print-date {
+    font-size: 0.85rem;
+    color: #555;
+    margin: 2px 0 0;
+  }
+
+  /* Páginas: mostrar apenas a ativa */
+  .page {
+    display: none !important;
+  }
+  .page.active {
+    display: block !important;
+  }
+
+  /* Seção cabeçalho */
+  .section-head {
+    margin-bottom: 16px;
+  }
+  .section-head h2 {
+    font-size: 1.4rem;
+    color: #1a1a2e;
+  }
+  .section-head p {
+    color: #555;
+    font-size: 0.9rem;
+  }
+  .eyebrow {
+    font-size: 0.7rem;
+    color: #2563eb;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  /* Painéis e tabelas */
+  .panel, .table-panel {
+    border: 1px solid #ccc !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .report-summary {
+    background: #f5f5f5 !important;
+    color: #333 !important;
+    padding: 10px 16px !important;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #ccc !important;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    background: #1a1a2e !important;
+    color: #fff !important;
+    padding: 8px 12px !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  td {
+    padding: 9px 12px !important;
+    border-bottom: 1px solid #e5e5e5 !important;
+    color: #111 !important;
+    font-size: 0.9rem;
+  }
+
+  tr:last-child td {
+    border-bottom: none !important;
+  }
+
+  td b { font-weight: 600; }
+  td small { color: #666; }
+
+  .badge {
+    border: 1px solid #333;
+    color: #333 !important;
+    background: transparent !important;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+
+  .badge.out {
+    border-color: #c00;
+    color: #c00 !important;
+    font-weight: 700;
+  }
+
+  .badge.low {
+    border-color: #b45309;
+    color: #b45309 !important;
+  }
+
+  /* Lista de procuras no print */
+  .request-row {
+    border-bottom: 1px solid #e5e5e5 !important;
+    padding: 10px 12px !important;
+    background: #fff !important;
+  }
+
+  .request-row h4 { color: #111 !important; font-size: 1rem; }
+  .request-row p { color: #555 !important; font-size: 0.85rem; }
+
+  .circle {
+    background: #e5e5e5 !important;
+    color: #333 !important;
+    font-size: 0.8rem;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .circle.red {
+    background: #fee2e2 !important;
+    color: #c00 !important;
+  }
+
+  /* Rodapé de impressão */
+  .content::after {
+    content: 'Magalhães Diesel — Documento gerado pelo sistema de controle de estoque';
+    display: block;
+    margin-top: 32px;
+    padding-top: 12px;
+    border-top: 1px solid #ccc;
+    font-size: 0.75rem;
+    color: #999;
+    text-align: center;
+  }
 }
