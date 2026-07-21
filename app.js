@@ -1,6 +1,8 @@
 const $ = (s) => document.querySelector(s);
 let products = [];
 let searchDebounce = null;
+let requestsData = [];
+let requestSearchDebounce = null;
 
 // ─── API ────────────────────────────────────────────────────────────────────
 async function api(url, options = {}) {
@@ -47,8 +49,8 @@ async function loadDashboard() {
 
   $('#low-list').innerHTML = data.low.length
     ? data.low.map(p => {
-        const miss = Math.max(0, p.minimum - p.quantity);
-        return `<div class="compact-item"><span class="circle red">!</span><div><b>${escapeHtml(p.name)}</b><small>${escapeHtml(p.category)} · mín: ${p.minimum} ${escapeHtml(p.unit)}</small></div><span class="item-value">${p.quantity === 0 ? 'ZERADO' : miss + ' faltando'}</span></div>`;
+        const label = p.quantity === 0 ? 'ZERADO' : `Tem ${p.quantity} ${escapeHtml(p.unit)}`;
+        return `<div class="compact-item"><span class="circle red">!</span><div><b>${escapeHtml(p.name)}</b><small>${escapeHtml(p.category)} · mín: ${p.minimum} ${escapeHtml(p.unit)}</small></div><span class="item-value">${label}</span></div>`;
       }).join('')
     : '<p class="empty">Nenhum item precisa de reposição agora.</p>';
 
@@ -82,12 +84,18 @@ async function loadProducts() {
 }
 
 // ─── PROCURAS ────────────────────────────────────────────────────────────────
-async function loadRequests() {
-  const rows = await api('/api/requests');
-  $('#request-list').innerHTML = rows.length
-    ? rows.map(r => {
+function renderRequests() {
+  const needle = $('#request-search').value.trim().toLowerCase();
+  const shown = needle
+    ? requestsData.filter(r => `${r.item} ${r.customer || ''} ${r.phone || ''} ${r.note || ''}`.toLowerCase().includes(needle))
+    : requestsData;
+  
+  $('#request-count').textContent = `${shown.length} procura${shown.length !== 1 ? 's' : ''}`;
+  $('#request-list').innerHTML = shown.length
+    ? shown.map(r => {
         const open = r.status === 'aberta';
         return `<div class="request-row">
+          <input type="checkbox" class="request-checkbox" data-quantity="${r.quantity}" value="${r.id}" />
           <span class="circle ${open ? 'red' : ''}">${r.quantity}x</span>
           <div>
             <h4>${escapeHtml(r.item)}</h4>
@@ -98,7 +106,12 @@ async function loadRequests() {
           ${open ? `<button data-close-request="${r.id}">Atendida ✓</button>` : ''}
         </div>`;
       }).join('')
-    : '<p class="empty">Nenhuma procura anotada ainda.</p>';
+    : '<p class="empty">Nenhuma procura encontrada.</p>';
+}
+
+async function loadRequests() {
+  requestsData = await api('/api/requests');
+  renderRequests();
 }
 
 // ─── RELATÓRIO ───────────────────────────────────────────────────────────────
@@ -122,8 +135,48 @@ function setPrintHeader(title) {
   $('#print-date').textContent = 'Gerado em: ' + now;
 }
 
-function printReport()   { setPrintHeader('RELATÓRIO DE FALTAS E REPOSIÇÃO');   window.print(); }
-function printRequests() { setPrintHeader('RELATÓRIO DE PROCURAS DE CLIENTES'); window.print(); }
+function clearPrintHide() {
+  document.querySelectorAll('.request-row').forEach(row => row.classList.remove('print-hide'));
+}
+
+function printReport() { setPrintHeader('RELATÓRIO DE FALTAS E REPOSIÇÃO'); window.print(); }
+
+function printRequests() { 
+  clearPrintHide();
+  setPrintHeader('RELATÓRIO DE PROCURAS DE CLIENTES'); 
+  window.print(); 
+}
+
+function printSelectedRequests() {
+  const checkboxes = document.querySelectorAll('.request-checkbox');
+  let selectedCount = 0;
+  checkboxes.forEach(cb => {
+    if (cb.checked) {
+      selectedCount++;
+      cb.closest('.request-row').classList.remove('print-hide');
+    } else {
+      cb.closest('.request-row').classList.add('print-hide');
+    }
+  });
+  
+  if (selectedCount === 0) {
+    toast('Selecione pelo menos um item para imprimir', true);
+    clearPrintHide();
+    return;
+  }
+  
+  setPrintHeader('PROCURAS DE CLIENTES (SELECIONADOS)');
+  window.print();
+}
+
+function selectMultipleRequests() {
+  document.querySelectorAll('.request-checkbox').forEach(cb => {
+    if (parseInt(cb.dataset.quantity) >= 2) cb.checked = true;
+  });
+  toast('Itens com 2 ou mais procuras selecionados!');
+}
+
+window.addEventListener('afterprint', clearPrintHide);
 
 // ─── REFRESH ─────────────────────────────────────────────────────────────────
 async function refreshAll() {
@@ -175,9 +228,10 @@ document.addEventListener('click', async (e) => {
     return;
   }
 
-  // Botão "+1" — sem confirmação, rápido
+  // Botão "+1" — pede confirmação simples
   const incBtn = e.target.closest('[data-increment-request]');
   if (incBtn) {
+    if (!confirm('Tem certeza que um novo cliente fez o pedido deste item?')) return;
     try {
       const res = await api(`/api/requests?action=increment&id=${incBtn.dataset.incrementRequest}`, { method: 'POST' });
       toast(`+1 registrado! Total: ${res.quantity}x`);
@@ -190,6 +244,11 @@ document.addEventListener('click', async (e) => {
 $('#product-search').addEventListener('input', () => {
   clearTimeout(searchDebounce);
   searchDebounce = setTimeout(renderProducts, 200);
+});
+
+$('#request-search').addEventListener('input', () => {
+  clearTimeout(requestSearchDebounce);
+  requestSearchDebounce = setTimeout(renderRequests, 200);
 });
 
 // Forms
